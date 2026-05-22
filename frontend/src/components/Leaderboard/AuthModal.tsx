@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box, Typography, TextField, Button, IconButton,
   InputAdornment, CircularProgress, Divider, Alert,
@@ -78,6 +78,11 @@ interface AuthModalProps {
 const AuthModal: React.FC<AuthModalProps> = ({ open, initialMode = 'login', onClose }) => {
   const dispatch = useAppDispatch();
   const [mode, setMode] = useState<Mode>(initialMode);
+
+  // Sync internal mode whenever the modal is opened with a different initialMode
+  useEffect(() => {
+    if (open) setMode(initialMode);
+  }, [open, initialMode]);
 
   // Login fields
   const [loginEmail, setLoginEmail] = useState('');
