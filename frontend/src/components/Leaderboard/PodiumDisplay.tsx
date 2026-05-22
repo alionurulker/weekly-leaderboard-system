@@ -34,7 +34,12 @@ const PodiumCard: React.FC<{
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        flex: isFirst ? '0 0 160px' : '0 0 140px',
+        // Responsive: fluid on mobile, fixed on larger screens
+        flex: {
+          xs: isFirst ? '0 0 36%' : '0 0 30%',
+          sm: isFirst ? '0 0 160px' : '0 0 140px',
+        },
+        minWidth: 0, // allow shrinking below content size
         animation: `slideInUp 0.5s ease ${visualPos * 0.1}s both`,
       }}
     >
@@ -42,7 +47,7 @@ const PodiumCard: React.FC<{
       {isFirst && (
         <Typography
           sx={{
-            fontSize: '1.5rem',
+            fontSize: { xs: '1.1rem', sm: '1.5rem' },
             mb: -0.5,
             animation: 'crownFloat 2s ease-in-out infinite',
           }}
@@ -56,11 +61,11 @@ const PodiumCard: React.FC<{
         <Avatar
           src={entry.avatarUrl}
           sx={{
-            width: isFirst ? 72 : 60,
-            height: isFirst ? 72 : 60,
+            width: { xs: isFirst ? 52 : 44, sm: isFirst ? 72 : 60 },
+            height: { xs: isFirst ? 52 : 44, sm: isFirst ? 72 : 60 },
             border: `3px solid ${color}`,
             boxShadow: GLOWS[rankIdx],
-            fontSize: isFirst ? '1.5rem' : '1.2rem',
+            fontSize: { xs: isFirst ? '1.1rem' : '0.9rem', sm: isFirst ? '1.5rem' : '1.2rem' },
             background: `linear-gradient(135deg, ${alpha(color, 0.3)}, ${alpha(color, 0.1)})`,
             fontFamily: '"Bebas Neue"',
           }}
@@ -94,14 +99,15 @@ const PodiumCard: React.FC<{
           sx={{
             fontFamily: '"Barlow Condensed", sans-serif',
             fontWeight: 700,
-            fontSize: isFirst ? '0.95rem' : '0.85rem',
+            fontSize: { xs: isFirst ? '0.72rem' : '0.65rem', sm: isFirst ? '0.95rem' : '0.85rem' },
             color: isCurrentPlayer ? '#00D4FF' : '#F0F2F8',
-            maxWidth: isFirst ? 140 : 120,
+            width: '100%',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
             textAlign: 'center',
             letterSpacing: '0.02em',
+            px: 0.5,
           }}
         >
           {getFlag(entry.country)} {entry.username}
@@ -111,7 +117,7 @@ const PodiumCard: React.FC<{
       {/* Score */}
       <Typography
         sx={{
-          fontSize: isFirst ? '0.8rem' : '0.72rem',
+          fontSize: { xs: isFirst ? '0.6rem' : '0.55rem', sm: isFirst ? '0.8rem' : '0.72rem' },
           color: alpha(color, 0.8),
           fontFamily: '"Barlow Condensed"',
           fontWeight: 600,
@@ -124,16 +130,19 @@ const PodiumCard: React.FC<{
       {/* Prize estimate */}
       <Box
         sx={{
-          px: 1.5, py: 0.5,
+          px: { xs: 0.75, sm: 1.5 },
+          py: 0.5,
           borderRadius: 1,
           background: alpha(color, 0.12),
           border: `1px solid ${alpha(color, 0.3)}`,
           mb: 1,
+          width: '100%',
+          boxSizing: 'border-box',
         }}
       >
         <Typography
           sx={{
-            fontSize: '0.65rem',
+            fontSize: { xs: '0.5rem', sm: '0.65rem' },
             color: 'rgba(255,255,255,0.4)',
             fontFamily: '"Barlow Condensed"',
             textAlign: 'center',
@@ -145,7 +154,7 @@ const PodiumCard: React.FC<{
         <Typography
           sx={{
             fontFamily: '"Bebas Neue", sans-serif',
-            fontSize: isFirst ? '1.1rem' : '0.9rem',
+            fontSize: { xs: isFirst ? '0.85rem' : '0.75rem', sm: isFirst ? '1.1rem' : '0.9rem' },
             color,
             textAlign: 'center',
             lineHeight: 1.1,
@@ -183,7 +192,7 @@ const PodiumCard: React.FC<{
         <Typography
           sx={{
             fontFamily: '"Bebas Neue", sans-serif',
-            fontSize: isFirst ? '2rem' : '1.5rem',
+            fontSize: { xs: isFirst ? '1.4rem' : '1.1rem', sm: isFirst ? '2rem' : '1.5rem' },
             color: alpha(color, 0.3),
           }}
         >
@@ -207,6 +216,8 @@ const PodiumDisplay: React.FC<PodiumDisplayProps> = ({ top3, currentPlayerId }) 
         px: { xs: 1, sm: 3 },
         pb: 0,
         overflow: 'hidden',
+        width: '100%',
+        boxSizing: 'border-box',
       }}
     >
       {ORDER.map((rankIdx) => {
