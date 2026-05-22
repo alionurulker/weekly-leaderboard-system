@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   Box, Container, Typography, Paper, Grid, IconButton,
-  Chip, Tooltip,
+  Chip, Tooltip, Button,
 } from '@mui/material';
 import { alpha } from '@mui/material/styles';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -9,6 +9,8 @@ import WifiIcon from '@mui/icons-material/Wifi';
 import WifiOffIcon from '@mui/icons-material/WifiOff';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import PersonIcon from '@mui/icons-material/Person';
+import LoginIcon from '@mui/icons-material/Login';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
 import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchLeaderboard } from '../../store/leaderboardSlice';
@@ -20,8 +22,11 @@ import CountdownTimer from './CountdownTimer';
 import PodiumDisplay from './PodiumDisplay';
 import LeaderboardTable from './LeaderboardTable';
 import EarningsSimulator from './EarningsSimulator';
+import AuthModal from './AuthModal';
 import { getRankSuffix } from '../../utils/format';
 import { getRankColor as getThemeRankColor } from '../../theme';
+
+type AuthModalMode = 'login' | 'register';
 
 const LeaderboardScreen: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -46,6 +51,8 @@ const LeaderboardScreen: React.FC = () => {
   } = useAppSelector((s) => s.player);
 
   const [refreshing, setRefreshing] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<AuthModalMode>('login');
 
   // Connect WebSocket
   useWebSocket();
@@ -74,6 +81,11 @@ const LeaderboardScreen: React.FC = () => {
     dispatch(loginDemoPlayer());
   };
 
+  const openAuth = (mode: AuthModalMode) => {
+    setAuthModalMode(mode);
+    setAuthModalOpen(true);
+  };
+
   const currentRank = currentPlayer?.entry.rank;
   const rankColor = currentRank ? getThemeRankColor(currentRank) : undefined;
 
@@ -97,6 +109,7 @@ const LeaderboardScreen: React.FC = () => {
             gap: 1,
           }}
         >
+          {/* Left: Title */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <EmojiEventsIcon
               sx={{
@@ -135,7 +148,8 @@ const LeaderboardScreen: React.FC = () => {
             </Box>
           </Box>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {/* Right: Controls */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
             {/* Live indicator */}
             <Chip
               icon={
@@ -159,8 +173,83 @@ const LeaderboardScreen: React.FC = () => {
               }}
             />
 
-            {/* Auth button */}
-            {isAuthenticated ? (
+            {/* ── Auth area: unauthenticated ── */}
+            {!isAuthenticated && (
+              <>
+                {/* Login button */}
+                <Button
+                  size="small"
+                  startIcon={<LoginIcon sx={{ fontSize: '0.85rem !important' }} />}
+                  onClick={() => openAuth('login')}
+                  sx={{
+                    height: 28,
+                    px: 1.5,
+                    fontFamily: '"Barlow Condensed", sans-serif',
+                    fontWeight: 700,
+                    fontSize: '0.7rem',
+                    letterSpacing: '0.08em',
+                    color: '#00D4FF',
+                    background: 'rgba(0,212,255,0.08)',
+                    border: '1px solid rgba(0,212,255,0.25)',
+                    borderRadius: 1,
+                    textTransform: 'none',
+                    '&:hover': {
+                      background: 'rgba(0,212,255,0.16)',
+                      border: '1px solid rgba(0,212,255,0.5)',
+                    },
+                  }}
+                >
+                  Sign In
+                </Button>
+
+                {/* Register button */}
+                <Button
+                  size="small"
+                  startIcon={<PersonAddIcon sx={{ fontSize: '0.85rem !important' }} />}
+                  onClick={() => openAuth('register')}
+                  sx={{
+                    height: 28,
+                    px: 1.5,
+                    fontFamily: '"Barlow Condensed", sans-serif',
+                    fontWeight: 700,
+                    fontSize: '0.7rem',
+                    letterSpacing: '0.08em',
+                    color: '#000',
+                    background: 'linear-gradient(135deg, #FFD700, #FFA000)',
+                    borderRadius: 1,
+                    textTransform: 'none',
+                    boxShadow: '0 2px 10px rgba(255,215,0,0.2)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #FFE033, #FFB300)',
+                      boxShadow: '0 2px 16px rgba(255,215,0,0.35)',
+                    },
+                  }}
+                >
+                  Register
+                </Button>
+
+                {/* Demo mode chip */}
+                <Chip
+                  label="DEMO"
+                  size="small"
+                  onClick={handleDemoLogin}
+                  sx={{
+                    height: 24,
+                    cursor: 'pointer',
+                    fontFamily: '"Barlow Condensed"',
+                    fontWeight: 700,
+                    fontSize: '0.6rem',
+                    background: 'rgba(255,215,0,0.06)',
+                    color: 'rgba(255,215,0,0.5)',
+                    border: '1px solid rgba(255,215,0,0.15)',
+                    '&:hover': { background: 'rgba(255,215,0,0.12)', color: '#FFD700' },
+                  }}
+                />
+              </>
+            )}
+
+            {/* ── Auth area: authenticated ── */}
+            {isAuthenticated && (
               <Chip
                 icon={<PersonIcon sx={{ fontSize: '0.75rem !important' }} />}
                 label={username || 'Player'}
@@ -176,23 +265,6 @@ const LeaderboardScreen: React.FC = () => {
                   border: '1px solid rgba(0,212,255,0.2)',
                   '& .MuiChip-icon': { color: 'inherit' },
                   '& .MuiChip-deleteIcon': { color: 'rgba(0,212,255,0.5)' },
-                }}
-              />
-            ) : (
-              <Chip
-                label="DEMO MODE"
-                size="small"
-                onClick={handleDemoLogin}
-                sx={{
-                  height: 24,
-                  cursor: 'pointer',
-                  fontFamily: '"Barlow Condensed"',
-                  fontWeight: 700,
-                  fontSize: '0.6rem',
-                  background: 'rgba(255,215,0,0.08)',
-                  color: '#FFD700',
-                  border: '1px solid rgba(255,215,0,0.2)',
-                  '&:hover': { background: 'rgba(255,215,0,0.14)' },
                 }}
               />
             )}
@@ -371,6 +443,13 @@ const LeaderboardScreen: React.FC = () => {
           </Grid>
         </Grid>
       </Container>
+
+      {/* ── Auth Modal ──────────────────────────────────────────── */}
+      <AuthModal
+        open={authModalOpen}
+        initialMode={authModalMode}
+        onClose={() => setAuthModalOpen(false)}
+      />
     </Box>
   );
 };
