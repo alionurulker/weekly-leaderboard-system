@@ -135,25 +135,6 @@ export const addEarnings = createAsyncThunk<
   }
 );
 
-/** Demo login — creates a guest session using the seeded demo account */
-export const loginDemoPlayer = createAsyncThunk<AuthSuccessData, void, { rejectValue: string }>(
-  'player/loginDemoPlayer',
-  async (_, { rejectWithValue }) => {
-    try {
-      const { data } = await axios.post<{ success: boolean; data: AuthSuccessData }>(
-        `${API_BASE}/players/login`,
-        { email: 'demo@leaderboard.com', password: 'password123' }
-      );
-      return data.data;
-    } catch (err: unknown) {
-      if (axios.isAxiosError(err)) {
-        return rejectWithValue(err.response?.data?.error || 'Demo login failed');
-      }
-      return rejectWithValue('Demo login failed');
-    }
-  }
-);
-
 // ─── Initial state ────────────────────────────────────────────────────────────
 const initialState: PlayerState = {
   isAuthenticated: false,
@@ -245,20 +226,6 @@ const playerSlice = createSlice({
       .addCase(addEarnings.rejected, (state, { payload }) => {
         state.loading = false;
         state.error = payload ?? 'Failed to add earnings';
-      });
-
-    // ── loginDemoPlayer ───────────────────────────────────────────────────────
-    builder
-      .addCase(loginDemoPlayer.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(loginDemoPlayer.fulfilled, (state, { payload }) => {
-        applyAuthSuccess(state, payload);
-      })
-      .addCase(loginDemoPlayer.rejected, (state, { payload }) => {
-        state.loading = false;
-        state.error = payload ?? 'Demo login failed';
       });
   },
 });

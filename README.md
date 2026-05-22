@@ -210,7 +210,7 @@ Demo credentials:
 
 ### 7. Log in and test
 
-Open `http://localhost:5173` and click the **DEMO MODE** button in the top right. This logs in as the demo player (`YouAreHere`) using real JWT authentication. Once logged in:
+Open `http://localhost:5173` and log in as the demo player (`YouAreHere`) using real JWT authentication. Once logged in:
 
 - Your rank (~47th) appears in the banner at the top
 - The **SIMULATE EARNINGS** panel appears on the left

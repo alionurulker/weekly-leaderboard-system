@@ -14,7 +14,7 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
 import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchLeaderboard } from '../../store/leaderboardSlice';
-import { loginDemoPlayer, logout } from '../../store/playerSlice';
+import { logout } from '../../store/playerSlice';
 import { useWebSocket } from '../../hooks/useWebSocket';
 
 import PrizePoolBanner from './PrizePoolBanner';
@@ -76,10 +76,6 @@ const LeaderboardScreen: React.FC = () => {
     await dispatch(fetchLeaderboard());
     setTimeout(() => setRefreshing(false), 600);
   }, [dispatch]);
-
-  const handleDemoLogin = () => {
-    dispatch(loginDemoPlayer());
-  };
 
   const openAuth = (mode: AuthModalMode) => {
     setAuthModalMode(mode);
@@ -227,24 +223,6 @@ const LeaderboardScreen: React.FC = () => {
                 >
                   Register
                 </Button>
-
-                {/* Demo mode chip */}
-                <Chip
-                  label="DEMO"
-                  size="small"
-                  onClick={handleDemoLogin}
-                  sx={{
-                    height: 24,
-                    cursor: 'pointer',
-                    fontFamily: '"Barlow Condensed"',
-                    fontWeight: 700,
-                    fontSize: '0.6rem',
-                    background: 'rgba(255,215,0,0.06)',
-                    color: 'rgba(255,215,0,0.5)',
-                    border: '1px solid rgba(255,215,0,0.15)',
-                    '&:hover': { background: 'rgba(255,215,0,0.12)', color: '#FFD700' },
-                  }}
-                />
               </>
             )}
 
