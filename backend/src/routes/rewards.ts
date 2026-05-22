@@ -1,4 +1,4 @@
-import { Router, Response } from 'express';
+import { Router, Request, Response } from 'express';
 import { distributeWeeklyRewards } from '../services/rewardService';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { query } from '../config/database';
@@ -7,14 +7,19 @@ const router = Router();
 
 const ADMIN_SECRET = process.env.ADMIN_SECRET || 'admin-secret-change-me';
 
-// POST /api/rewards/distribute
-// Admin endpoint to manually trigger reward distribution
-router.post('/distribute', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
-  const adminSecret = req.headers['x-admin-secret'];
-  if (adminSecret !== ADMIN_SECRET) {
+/** Shared admin-secret guard — no JWT needed, matches the seed endpoint pattern. */
+const requireAdminSecret = (req: Request, res: Response): boolean => {
+  if (req.headers['x-admin-secret'] !== ADMIN_SECRET) {
     res.status(403).json({ error: 'Admin access required' });
-    return;
+    return false;
   }
+  return true;
+};
+
+// ── POST /api/rewards/distribute ─────────────────────────────────────────────
+// Manually trigger reward distribution (requires JWT + admin secret).
+router.post('/distribute', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
+  if (!requireAdminSecret(req, res)) return;
 
   try {
     const result = await distributeWeeklyRewards();
@@ -25,8 +30,57 @@ router.post('/distribute', authenticate, async (req: AuthRequest, res: Response)
   }
 });
 
-// GET /api/rewards/history
-// Get reward history for current player
+// ── POST /api/rewards/reset ──────────────────────────────────────────────────
+// Testing endpoint: runs a full end-of-week cycle right now.
+//
+// Exactly what happens (in order, inside distributeWeeklyRewards):
+//   1. Reads the current prize pool and top-100 from Redis.
+//   2. Distributes the pool to top-100 players:
+//        Rank 1  → 20 %
+//        Rank 2  → 15 %
+//        Rank 3  → 10 %
+//        Rank 4-100 → 55 % split by inverse-rank weight (rank 4 gets most)
+//   3. Persists prize_pools, weekly_snapshots and reward_transactions to PostgreSQL.
+//   4. Resets Redis: deletes the leaderboard sorted set, zeroes the prize pool,
+//      and stamps a new week_start — ready for the new week immediately.
+//
+// Auth: x-admin-secret header only (no JWT), matching the seed endpoint pattern.
+//
+// Example (PowerShell):
+//   Invoke-WebRequest -Uri "https://<host>/api/rewards/reset" `
+//     -Method POST `
+//     -Headers @{ "x-admin-secret" = "your-admin-secret" }
+router.post('/reset', async (req: Request, res: Response): Promise<void> => {
+  if (!requireAdminSecret(req, res)) return;
+
+  try {
+    const result = await distributeWeeklyRewards();
+    res.json({
+      success: true,
+      message: 'Weekly reset complete. Prize pool distributed and leaderboard cleared.',
+      data: {
+        weekStart: result.weekStart,
+        weekEnd: result.weekEnd,
+        totalPool: result.totalPool,
+        distributedAt: result.distributedAt,
+        recipientCount: result.distributions.length,
+        // Top 10 for a quick sanity-check in the response
+        topDistributions: result.distributions.slice(0, 10).map((d) => ({
+          rank: d.rank,
+          username: d.username,
+          amount: d.amount,
+          percentage: Number(d.percentage.toFixed(4)),
+        })),
+      },
+    });
+  } catch (err) {
+    console.error('Reset endpoint failed:', err);
+    res.status(500).json({ error: 'Reset failed', detail: err instanceof Error ? err.message : String(err) });
+  }
+});
+
+// ── GET /api/rewards/history ─────────────────────────────────────────────────
+// Reward history for the authenticated player.
 router.get('/history', authenticate, async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const result = await query(
@@ -45,7 +99,7 @@ router.get('/history', authenticate, async (req: AuthRequest, res: Response): Pr
   }
 });
 
-// GET /api/rewards/current-pool
+// ── GET /api/rewards/current-pool ────────────────────────────────────────────
 router.get('/current-pool', async (_req, res: Response): Promise<void> => {
   try {
     const { getRedisClient, REDIS_KEYS } = await import('../config/redis');
