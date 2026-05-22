@@ -3,8 +3,6 @@ dotenv.config();
 
 import { createRedisClient, REDIS_KEYS } from '../config/redis';
 import { initializeDatabase, query } from '../config/database';
-import { connectMongoDB } from '../config/mongodb';
-import { cachePlayerMeta } from '../services/leaderboardService';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -20,7 +18,6 @@ const generateUsername = (i: number): string => {
   return `${adj}${noun}${i}`;
 };
 
-// Generates Pareto-distributed scores (realistic: few high earners, many low)
 const generateScore = (rank: number, total: number): number => {
   const t = 1 - (rank - 1) / total;
   const base = Math.pow(t, 2.5) * 500_000;
@@ -35,95 +32,100 @@ export async function seed() {
   console.log('Starting seed...');
 
   const redis = createRedisClient();
-  await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for Redis connect
+  await new Promise(resolve => setTimeout(resolve, 500));
 
   await initializeDatabase();
 
-  const passwordHash = await bcrypt.hash('password123', 12);
+  // Use lower bcrypt rounds for speed (10 instead of 12)
+  const passwordHash = await bcrypt.hash('password123', 10);
 
   // Clear existing data
-  const pipeline = redis.pipeline();
-  pipeline.del(REDIS_KEYS.LEADERBOARD);
-  pipeline.set(REDIS_KEYS.PRIZE_POOL, '0');
-  await pipeline.exec();
+  const clearPipeline = redis.pipeline();
+  clearPipeline.del(REDIS_KEYS.LEADERBOARD);
+  clearPipeline.set(REDIS_KEYS.PRIZE_POOL, '0');
+  await clearPipeline.exec();
   await query('TRUNCATE players CASCADE');
 
   console.log('Cleared existing data');
 
-  // Create demo player first (rank ~47 by design)
-  await query(
-    `INSERT INTO players (id, username, email, password_hash, country, total_earnings)
-     VALUES ($1, $2, $3, $4, $5, $6)`,
-    [DEMO_PLAYER_ID, DEMO_USERNAME, 'demo@leaderboard.com', passwordHash, 'TR', 0]
-  );
-  await cachePlayerMeta(DEMO_PLAYER_ID, {
-    username: DEMO_USERNAME,
-    country: 'TR',
-    avatarUrl: undefined,
-  });
-
-  // Create all players
+  // ── Batch insert all players in one query ──────────────────────────
   const players: Array<{ id: string; username: string; country: string }> = [];
 
+  // Build demo player row
+  const allRows = [{
+    id: DEMO_PLAYER_ID,
+    username: DEMO_USERNAME,
+    email: 'demo@leaderboard.com',
+    country: 'TR',
+  }];
+
+  // Build all player rows
   for (let i = 1; i <= PLAYER_COUNT; i++) {
     const id = uuidv4();
     const username = generateUsername(i);
     const country = COUNTRIES[Math.floor(Math.random() * COUNTRIES.length)];
-
-    await query(
-      `INSERT INTO players (id, username, email, password_hash, country, total_earnings)
-       VALUES ($1, $2, $3, $4, $5, $6)`,
-      [id, username, `${username.toLowerCase()}@example.com`, passwordHash, country, 0]
-    );
-
-    await cachePlayerMeta(id, { username, country });
+    allRows.push({
+      id,
+      username,
+      email: `${username.toLowerCase()}@example.com`,
+      country,
+    });
     players.push({ id, username, country });
-
-    if (i % 50 === 0) console.log(`Created ${i}/${PLAYER_COUNT} players`);
   }
 
-  // Insert demo player into the array at position ~47 worth of score
-  const allPlayers = [...players];
+  // Single batch INSERT for all 251 players
+  const valuePlaceholders = allRows.map((_, i) =>
+    `($${i * 5 + 1}, $${i * 5 + 2}, $${i * 5 + 3}, $${i * 5 + 4}, $${i * 5 + 5}, 0)`
+  ).join(', ');
 
-  // Assign scores in rank order (sorted descending)
-  const sortedPlayers = [...allPlayers];
-  // Demo player gets rank ~47 score
+  const valueParams = allRows.flatMap(r => [r.id, r.username, r.email, passwordHash, r.country]);
+
+  await query(
+    `INSERT INTO players (id, username, email, password_hash, country, total_earnings)
+     VALUES ${valuePlaceholders}`,
+    valueParams
+  );
+
+  console.log(`Inserted ${allRows.length} players in one batch`);
+
+  // ── Batch all Redis operations in one pipeline ─────────────────────
+  const scorePipeline = redis.pipeline();
   const demoScore = generateScore(47, PLAYER_COUNT + 1);
 
-  // Score all other players
-  const scoreBatch = redis.pipeline();
-  let totalEarnings = 0;
-
-  for (let i = 0; i < sortedPlayers.length; i++) {
+  for (let i = 0; i < players.length; i++) {
     const score = generateScore(i + 1, PLAYER_COUNT + 1);
-    totalEarnings += score;
-    scoreBatch.zadd(REDIS_KEYS.LEADERBOARD, score, sortedPlayers[i].id);
-    scoreBatch.incrbyfloat(REDIS_KEYS.PRIZE_POOL, score * 0.02);
+    scorePipeline.zadd(REDIS_KEYS.LEADERBOARD, score, players[i].id);
+    scorePipeline.incrbyfloat(REDIS_KEYS.PRIZE_POOL, score * 0.02);
+    // Cache player metadata
+    scorePipeline.setex(
+      `player:meta:${players[i].id}`,
+      604800,
+      JSON.stringify({ username: players[i].username, country: players[i].country })
+    );
   }
 
-  // Add demo player
-  scoreBatch.zadd(REDIS_KEYS.LEADERBOARD, demoScore, DEMO_PLAYER_ID);
-  scoreBatch.incrbyfloat(REDIS_KEYS.PRIZE_POOL, demoScore * 0.02);
+  // Demo player scores and metadata
+  scorePipeline.zadd(REDIS_KEYS.LEADERBOARD, demoScore, DEMO_PLAYER_ID);
+  scorePipeline.incrbyfloat(REDIS_KEYS.PRIZE_POOL, demoScore * 0.02);
+  scorePipeline.setex(
+    `player:meta:${DEMO_PLAYER_ID}`,
+    604800,
+    JSON.stringify({ username: DEMO_USERNAME, country: 'TR' })
+  );
 
-  await scoreBatch.exec();
+  await scorePipeline.exec();
 
   const finalPool = await redis.get(REDIS_KEYS.PRIZE_POOL);
   const totalInLeaderboard = await redis.zcard(REDIS_KEYS.LEADERBOARD);
 
-  console.log(`\nSeed complete!`);
-  console.log(`Players in leaderboard: ${totalInLeaderboard}`);
-  console.log(`Prize pool: $${parseFloat(finalPool || '0').toFixed(2)}`);
-  console.log(`\nDemo credentials:`);
-  console.log(`  Email: demo@leaderboard.com`);
-  console.log(`  Password: password123`);
-  console.log(`  Player ID: ${DEMO_PLAYER_ID}`);
+  console.log(`Seed complete! Players: ${totalInLeaderboard}, Prize pool: $${parseFloat(finalPool || '0').toFixed(2)}`);
 
-  process.exit(0);
+  // Do NOT call process.exit() here — only exit when run directly
 }
 
 if (require.main === module) {
   seed().catch((err) => {
     console.error('Seed failed:', err);
     process.exit(1);
-  });
+  }).then(() => process.exit(0));
 }
