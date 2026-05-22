@@ -94,4 +94,14 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
+router.post('/seed', async (req, res) => {
+  if (req.headers['x-admin-secret'] !== process.env.ADMIN_SECRET) {
+    res.status(403).json({ error: 'Forbidden' });
+    return;
+  }
+  const { seed } = await import('../scripts/seed');
+  await seed();
+  res.json({ success: true });
+});
+
 export default router;
