@@ -31,7 +31,7 @@ const generateScore = (rank: number, total: number): number => {
 const DEMO_PLAYER_ID = '00000000-0000-0000-0000-000000000001';
 const DEMO_USERNAME = 'YouAreHere';
 
-async function seed() {
+export async function seed() {
   console.log('Starting seed...');
 
   const redis = createRedisClient();
@@ -121,7 +121,9 @@ async function seed() {
   process.exit(0);
 }
 
-seed().catch((err) => {
-  console.error('Seed failed:', err);
-  process.exit(1);
-});
+if (require.main === module) {
+  seed().catch((err) => {
+    console.error('Seed failed:', err);
+    process.exit(1);
+  });
+}

@@ -94,14 +94,19 @@ router.get('/:id', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-router.post('/seed', async (req, res) => {
+router.post('/seed', async (req: Request, res: Response): Promise<void> => {
   if (req.headers['x-admin-secret'] !== process.env.ADMIN_SECRET) {
     res.status(403).json({ error: 'Forbidden' });
     return;
   }
-  const { seed } = await import('../scripts/seed');
-  await seed();
-  res.json({ success: true });
+  try {
+    const { seed } = await import('../scripts/seed');
+    await seed();
+    res.json({ success: true, message: 'Seed completed' });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Seed failed';
+    res.status(500).json({ error: message });
+  }
 });
 
 export default router;
