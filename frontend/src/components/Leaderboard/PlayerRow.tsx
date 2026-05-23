@@ -16,6 +16,7 @@ interface PlayerRowProps {
   isSeparator?: boolean;
 }
 
+// ─── Rank Badge ──────────────────────────────────────────────────────────────
 const RankBadge: React.FC<{ rank: number }> = ({ rank }) => {
   const color = getThemeRankColor(rank);
   const isTop3 = rank <= 3;
@@ -29,20 +30,22 @@ const RankBadge: React.FC<{ rank: number }> = ({ rank }) => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: isTop3 ? alpha(color, 0.2) : 'transparent',
+        background: isTop3 ? alpha(color, 0.18) : 'transparent',
         border: isTop3 ? `2px solid ${alpha(color, 0.5)}` : `1px solid ${alpha(color, 0.2)}`,
-        boxShadow: isTop3 ? `0 0 12px ${alpha(color, 0.3)}` : 'none',
+        boxShadow: isTop3 ? `0 0 14px ${alpha(color, 0.35)}` : 'none',
         transition: 'all 0.3s',
         flexShrink: 0,
       }}
     >
+      {/* Orbitron for rank number — geometric, crisp at small sizes */}
       <Typography
         sx={{
-          fontFamily: '"Bebas Neue", sans-serif',
-          fontSize: isTop3 ? '1.1rem' : '0.95rem',
+          fontFamily: '"Orbitron", sans-serif',
+          fontWeight: isTop3 ? 800 : 600,
+          fontSize: isTop3 ? '1rem' : '0.8rem',
           color,
           lineHeight: 1,
-          letterSpacing: '0.02em',
+          letterSpacing: '-0.01em',
         }}
       >
         {rank}
@@ -51,26 +54,33 @@ const RankBadge: React.FC<{ rank: number }> = ({ rank }) => {
   );
 };
 
+// ─── Change Indicator ─────────────────────────────────────────────────────────
 const ChangeIndicator: React.FC<{ change?: number }> = ({ change }) => {
   if (change === undefined || change === 0) {
-    return <RemoveIcon sx={{ fontSize: 14, color: 'rgba(255,255,255,0.2)' }} />;
+    return <RemoveIcon sx={{ fontSize: 14, color: 'rgba(255,255,255,0.18)' }} />;
   }
   if (change > 0) {
     return (
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25, color: '#00E396' }}>
-        <ArrowUpwardIcon sx={{ fontSize: 12 }} />
-        <Typography sx={{ fontSize: '0.65rem', fontWeight: 700 }}>{change}</Typography>
+        <ArrowUpwardIcon sx={{ fontSize: 11 }} />
+        {/* Share Tech Mono for change numbers — monospace keeps columns aligned */}
+        <Typography sx={{ fontSize: '0.6rem', fontFamily: '"Share Tech Mono", monospace', fontWeight: 400 }}>
+          {change}
+        </Typography>
       </Box>
     );
   }
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25, color: '#FF4D6A' }}>
-      <ArrowDownwardIcon sx={{ fontSize: 12 }} />
-      <Typography sx={{ fontSize: '0.65rem', fontWeight: 700 }}>{Math.abs(change)}</Typography>
+      <ArrowDownwardIcon sx={{ fontSize: 11 }} />
+      <Typography sx={{ fontSize: '0.6rem', fontFamily: '"Share Tech Mono", monospace', fontWeight: 400 }}>
+        {Math.abs(change)}
+      </Typography>
     </Box>
   );
 };
 
+// ─── PlayerRow ───────────────────────────────────────────────────────────────
 const PlayerRow: React.FC<PlayerRowProps> = ({ entry, index, isSeparator }) => {
   const rankColor = getThemeRankColor(entry.rank);
   const [scoreFlash, setScoreFlash] = useState(false);
@@ -84,37 +94,27 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ entry, index, isSeparator }) => {
     prevScore.current = entry.score;
   }, [entry.score]);
 
+  // Separator row
   if (isSeparator) {
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1,
-          py: 1,
-          px: 2,
-        }}
-      >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 1, px: 2 }}>
         {[0, 1, 2].map((i) => (
-          <Box
-            key={i}
-            sx={{
-              width: 4, height: 4, borderRadius: '50%',
-              background: 'rgba(255,255,255,0.15)',
-            }}
-          />
+          <Box key={i} sx={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(255,255,255,0.12)' }} />
         ))}
-        <Typography sx={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.2)', letterSpacing: '0.1em' }}>
-          MORE PLAYERS
+        <Typography
+          sx={{
+            fontFamily: '"Oxanium", sans-serif',
+            fontWeight: 500,
+            fontSize: '0.6rem',
+            letterSpacing: '0.14em',
+            color: 'rgba(255,255,255,0.2)',
+            textTransform: 'uppercase',
+          }}
+        >
+          More Players
         </Typography>
         {[0, 1, 2].map((i) => (
-          <Box
-            key={i}
-            sx={{
-              width: 4, height: 4, borderRadius: '50%',
-              background: 'rgba(255,255,255,0.15)',
-            }}
-          />
+          <Box key={i} sx={{ width: 4, height: 4, borderRadius: '50%', background: 'rgba(255,255,255,0.12)' }} />
         ))}
       </Box>
     );
@@ -130,11 +130,11 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ entry, index, isSeparator }) => {
         alignItems: 'center',
         gap: { xs: 1, sm: 1.5 },
         px: { xs: 1.5, sm: 2.5 },
-        py: { xs: 1, sm: 1.25 },
+        py: { xs: 0.9, sm: 1.1 },
         borderRadius: 1.5,
         border: '1px solid transparent',
         animation: `slideInUp 0.35s ease ${Math.min(index, 15) * 0.02}s both`,
-        transition: 'background 0.2s, border-color 0.2s, transform 0.15s',
+        transition: 'background 0.2s, border-color 0.2s',
         position: 'relative',
         overflow: 'hidden',
         cursor: 'default',
@@ -142,7 +142,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ entry, index, isSeparator }) => {
         ...(isCurrentPlayer && {
           background: 'rgba(0,212,255,0.06)',
           borderColor: 'rgba(0,212,255,0.25)',
-          boxShadow: '0 0 20px rgba(0,212,255,0.08)',
+          boxShadow: '0 0 20px rgba(0,212,255,0.07)',
           '&::before': {
             content: '""',
             position: 'absolute',
@@ -154,8 +154,8 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ entry, index, isSeparator }) => {
         }),
         ...(!isCurrentPlayer && {
           '&:hover': {
-            background: 'rgba(255,255,255,0.03)',
-            borderColor: `${alpha(rankColor, 0.15)}`,
+            background: 'rgba(255,255,255,0.025)',
+            borderColor: alpha(rankColor, 0.14),
           },
         }),
         ...(isTop3 && !isCurrentPlayer && {
@@ -164,7 +164,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ entry, index, isSeparator }) => {
         }),
       }}
     >
-      {/* Rank */}
+      {/* Rank badge */}
       <RankBadge rank={entry.rank} />
 
       {/* Change indicator */}
@@ -176,16 +176,18 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ entry, index, isSeparator }) => {
       <Avatar
         src={entry.avatarUrl}
         sx={{
-          width: 36,
-          height: 36,
-          fontSize: '0.9rem',
+          width: 34,
+          height: 34,
+          /* First letter of username — Orbitron gives it a badge feel */
+          fontFamily: '"Orbitron", sans-serif',
+          fontWeight: 700,
+          fontSize: '0.8rem',
           background: `linear-gradient(135deg, ${alpha(rankColor, 0.4)}, ${alpha(rankColor, 0.15)})`,
           border: isCurrentPlayer
             ? '2px solid rgba(0,212,255,0.5)'
             : isTop3
               ? `1px solid ${alpha(rankColor, 0.4)}`
-              : '1px solid rgba(255,255,255,0.1)',
-          fontFamily: '"Bebas Neue"',
+              : '1px solid rgba(255,255,255,0.08)',
           flexShrink: 0,
         }}
       >
@@ -195,34 +197,40 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ entry, index, isSeparator }) => {
       {/* Username + country */}
       <Box sx={{ flex: 1, minWidth: 0 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+          {/* Username — Rajdhani semi-bold: readable at small sizes in dense rows */}
           <Typography
             sx={{
-              fontFamily: '"Barlow Condensed", sans-serif',
+              fontFamily: '"Rajdhani", sans-serif',
               fontWeight: 600,
-              fontSize: { xs: '0.875rem', sm: '0.95rem' },
+              fontSize: { xs: '0.92rem', sm: '1rem' },
               color: isCurrentPlayer ? '#00D4FF' : '#F0F2F8',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap',
-              letterSpacing: '0.01em',
+              letterSpacing: '0.03em',
+              lineHeight: 1.2,
             }}
           >
             {entry.username}
           </Typography>
+
           {entry.country && (
-            <Typography sx={{ fontSize: '0.85rem', flexShrink: 0 }}>
+            <Typography sx={{ fontSize: '0.82rem', flexShrink: 0, lineHeight: 1 }}>
               {getFlag(entry.country)}
             </Typography>
           )}
+
           {isCurrentPlayer && (
             <Chip
               label="YOU"
               size="small"
               sx={{
-                height: 18,
-                fontSize: '0.55rem',
-                fontWeight: 800,
-                letterSpacing: '0.08em',
+                height: 17,
+                /* Oxanium for chip labels — wide tracking, compact */
+                fontFamily: '"Oxanium", sans-serif',
+                fontWeight: 700,
+                fontSize: '0.5rem',
+                letterSpacing: '0.1em',
                 background: 'rgba(0,212,255,0.15)',
                 color: '#00D4FF',
                 border: '1px solid rgba(0,212,255,0.3)',
@@ -234,16 +242,16 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ entry, index, isSeparator }) => {
         </Box>
       </Box>
 
-      {/* Score */}
+      {/* Score — Share Tech Mono: monospace keeps digits from jumping width */}
       <Box sx={{ textAlign: 'right', flexShrink: 0 }}>
         <Typography
           sx={{
-            fontFamily: '"Barlow Condensed", sans-serif',
-            fontWeight: 700,
-            fontSize: { xs: '0.85rem', sm: '0.95rem' },
-            color: scoreFlash ? '#00E396' : 'rgba(255,255,255,0.7)',
+            fontFamily: '"Share Tech Mono", monospace',
+            fontSize: { xs: '0.82rem', sm: '0.9rem' },
+            color: scoreFlash ? '#00E396' : 'rgba(255,255,255,0.65)',
             transition: 'color 0.3s',
             letterSpacing: '0.01em',
+            lineHeight: 1.3,
           }}
         >
           {formatCurrency(entry.score, true)}
@@ -256,41 +264,45 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ entry, index, isSeparator }) => {
           textAlign: 'right',
           flexShrink: 0,
           minWidth: { xs: 64, sm: 80 },
-          display: { xs: entry.rank <= 10 || isCurrentPlayer ? 'block' : 'none', sm: 'block' },
+          display: {
+            xs: entry.rank <= 10 || isCurrentPlayer ? 'block' : 'none',
+            sm: 'block',
+          },
         }}
       >
-        {entry.prizeEstimate > 0 ? (
+        {entry.prizeEstimate > 0 && (
           <Tooltip title="Estimated prize if week ended now" placement="left" arrow>
-            <Box
-              sx={{
-                display: 'inline-flex',
-                flexDirection: 'column',
-                alignItems: 'flex-end',
-              }}
-            >
+            <Box sx={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+              {/* "EST. PRIZE" micro label — Oxanium */}
               <Typography
                 sx={{
-                  fontSize: '0.55rem',
-                  color: 'rgba(255,255,255,0.3)',
-                  letterSpacing: '0.06em',
-                  fontFamily: '"Barlow Condensed"',
+                  fontFamily: '"Oxanium", sans-serif',
+                  fontWeight: 500,
+                  fontSize: '0.48rem',
+                  letterSpacing: '0.12em',
+                  color: 'rgba(255,255,255,0.28)',
+                  textTransform: 'uppercase',
+                  lineHeight: 1.4,
                 }}
               >
-                EST. PRIZE
+                Est. Prize
               </Typography>
+              {/* Prize value — Orbitron, rank-coloured */}
               <Typography
                 sx={{
-                  fontFamily: '"Bebas Neue", sans-serif',
-                  fontSize: { xs: '0.9rem', sm: '1rem' },
+                  fontFamily: '"Orbitron", sans-serif',
+                  fontWeight: 700,
+                  fontSize: { xs: '0.78rem', sm: '0.88rem' },
                   color: alpha(rankColor, 0.9),
                   lineHeight: 1,
+                  letterSpacing: '-0.01em',
                 }}
               >
                 {formatCurrency(entry.prizeEstimate, true)}
               </Typography>
             </Box>
           </Tooltip>
-        ) : null}
+        )}
       </Box>
     </Box>
   );

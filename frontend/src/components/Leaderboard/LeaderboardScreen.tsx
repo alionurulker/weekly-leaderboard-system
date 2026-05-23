@@ -14,7 +14,7 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
 import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchLeaderboard } from '../../store/leaderboardSlice';
-import { logout } from '../../store/playerSlice';
+import {  logout } from '../../store/playerSlice';
 import { useWebSocket } from '../../hooks/useWebSocket';
 
 import PrizePoolBanner from './PrizePoolBanner';
@@ -26,48 +26,35 @@ import AuthModal from './AuthModal';
 import { getRankSuffix } from '../../utils/format';
 import { getRankColor as getThemeRankColor } from '../../theme';
 
+// ── Font constants ────────────────────────────────────────────────────────────
+const F_DISPLAY = '"Orbitron", sans-serif';
+const F_LABEL   = '"Oxanium", sans-serif';
+const F_BODY    = '"Rajdhani", sans-serif';
+const F_MONO    = '"Share Tech Mono", monospace';
+
 type AuthModalMode = 'login' | 'register';
 
 const LeaderboardScreen: React.FC = () => {
   const dispatch = useAppDispatch();
   const {
-    top100,
-    currentPlayer,
-    prizePool,
-    totalPlayers,
-    weekStart,
-    weekEnd: _weekEnd,
-    nextResetAt,
-    loading,
-    error,
-    lastUpdated,
-    wsConnected,
+    top100, currentPlayer, prizePool, totalPlayers,
+    weekStart, weekEnd: _weekEnd, nextResetAt,
+    loading, error, lastUpdated, wsConnected,
   } = useAppSelector((s) => s.leaderboard);
 
-  const {
-    isAuthenticated,
-    username,
-    id: playerId,
-  } = useAppSelector((s) => s.player);
+  const { isAuthenticated, username, id: playerId } = useAppSelector((s) => s.player);
 
   const [refreshing, setRefreshing] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<AuthModalMode>('login');
 
-  // Connect WebSocket
   useWebSocket();
 
-  // Initial fetch
-  useEffect(() => {
-    dispatch(fetchLeaderboard());
-  }, [dispatch, isAuthenticated]);
+  useEffect(() => { dispatch(fetchLeaderboard()); }, [dispatch, isAuthenticated]);
 
-  // Auto-refresh every 30s as fallback if WS disconnects
   useEffect(() => {
     if (wsConnected) return;
-    const interval = setInterval(() => {
-      dispatch(fetchLeaderboard());
-    }, 30_000);
+    const interval = setInterval(() => dispatch(fetchLeaderboard()), 30_000);
     return () => clearInterval(interval);
   }, [dispatch, wsConnected]);
 
@@ -77,90 +64,84 @@ const LeaderboardScreen: React.FC = () => {
     setTimeout(() => setRefreshing(false), 600);
   }, [dispatch]);
 
-  const openAuth = (mode: AuthModalMode) => {
-    setAuthModalMode(mode);
-    setAuthModalOpen(true);
-  };
+  const openAuth = (mode: AuthModalMode) => { setAuthModalMode(mode); setAuthModalOpen(true); };
 
   const currentRank = currentPlayer?.entry.rank;
   const rankColor = currentRank ? getThemeRankColor(currentRank) : undefined;
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        pt: { xs: 2, sm: 3 },
-        pb: { xs: 3, sm: 4 },
-      }}
-    >
+    <Box sx={{ minHeight: '100vh', pt: { xs: 2, sm: 3 }, pb: { xs: 3, sm: 4 } }}>
       <Container maxWidth="lg">
-        {/* ── Header ─────────────────────────────────────────────── */}
+
+        {/* ── Header ── */}
         <Box
           sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            mb: { xs: 2, sm: 3 },
-            flexWrap: 'wrap',
-            gap: 1,
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            mb: { xs: 2, sm: 3 }, flexWrap: 'wrap', gap: 1,
           }}
         >
-          {/* Left: Title */}
+          {/* Left: logo + title */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <EmojiEventsIcon
-              sx={{
-                fontSize: { xs: '1.5rem', sm: '2rem' },
-                color: '#FFD700',
-                filter: 'drop-shadow(0 0 8px rgba(255,215,0,0.5))',
-              }}
-            />
+            <EmojiEventsIcon sx={{ fontSize: { xs: '1.5rem', sm: '2rem' }, color: '#FFD700', filter: 'drop-shadow(0 0 8px rgba(255,215,0,0.5))' }} />
             <Box>
+              {/* Title — Orbitron */}
               <Typography
                 variant="h2"
                 sx={{
-                  fontSize: { xs: '1.6rem', sm: '2.2rem', md: '2.8rem' },
-                  lineHeight: 0.95,
+                  fontFamily: F_DISPLAY,
+                  fontWeight: 800,
+                  fontSize: { xs: '1.15rem', sm: '1.6rem', md: '2rem' },
+                  lineHeight: 1,
                   color: '#F0F2F8',
-                  letterSpacing: '0.04em',
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  textShadow: '0 0 30px rgba(255,215,0,0.1)',
                 }}
               >
-                WEEKLY
-                <Box component="span" sx={{ color: '#FFD700', ml: 1 }}>
-                  LEADERBOARD
+                Weekly{' '}
+                <Box component="span" sx={{ color: '#FFD700', textShadow: '0 0 20px rgba(255,215,0,0.4)' }}>
+                  Leaderboard
                 </Box>
               </Typography>
+
+              {/* Date range — Oxanium */}
               {weekStart && (
                 <Typography
-                  variant="caption"
-                  sx={{ color: 'rgba(255,255,255,0.35)', letterSpacing: '0.08em' }}
+                  sx={{
+                    fontFamily: F_LABEL,
+                    fontWeight: 500,
+                    fontSize: '0.58rem',
+                    letterSpacing: '0.14em',
+                    color: 'rgba(255,255,255,0.28)',
+                    textTransform: 'uppercase',
+                    mt: 0.25,
+                  }}
                 >
-                  {new Date(weekStart).toLocaleDateString('en-US', {
-                    month: 'short', day: 'numeric',
-                  })} — {nextResetAt ? new Date(nextResetAt).toLocaleDateString('en-US', {
-                    month: 'short', day: 'numeric', year: 'numeric',
-                  }) : ''}
+                  {new Date(weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  {' — '}
+                  {nextResetAt
+                    ? new Date(nextResetAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                    : ''}
                 </Typography>
               )}
             </Box>
           </Box>
 
-          {/* Right: Controls */}
+          {/* Right: controls */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-            {/* Live indicator */}
+            {/* Live chip — Oxanium */}
             <Chip
-              icon={
-                wsConnected
-                  ? <WifiIcon sx={{ fontSize: '0.75rem !important' }} />
-                  : <WifiOffIcon sx={{ fontSize: '0.75rem !important' }} />
-              }
-              label={wsConnected ? 'LIVE' : 'POLLING'}
+              icon={wsConnected
+                ? <WifiIcon sx={{ fontSize: '0.75rem !important' }} />
+                : <WifiOffIcon sx={{ fontSize: '0.75rem !important' }} />}
+              label={wsConnected ? 'Live' : 'Polling'}
               size="small"
               sx={{
                 height: 24,
-                fontFamily: '"Barlow Condensed"',
+                fontFamily: F_LABEL,
                 fontWeight: 700,
-                fontSize: '0.6rem',
-                letterSpacing: '0.08em',
+                fontSize: '0.58rem',
+                letterSpacing: '0.1em',
                 background: wsConnected ? 'rgba(0,227,150,0.1)' : 'rgba(255,179,0,0.1)',
                 color: wsConnected ? '#00E396' : '#FFB300',
                 border: `1px solid ${wsConnected ? 'rgba(0,227,150,0.25)' : 'rgba(255,179,0,0.25)'}`,
@@ -169,56 +150,48 @@ const LeaderboardScreen: React.FC = () => {
               }}
             />
 
-            {/* ── Auth area: unauthenticated ── */}
+            {/* Unauthenticated controls */}
             {!isAuthenticated && (
               <>
-                {/* Login button */}
+                {/* Sign In — cyan outline button, Orbitron */}
                 <Button
                   size="small"
-                  startIcon={<LoginIcon sx={{ fontSize: '0.85rem !important' }} />}
+                  startIcon={<LoginIcon sx={{ fontSize: '0.8rem !important' }} />}
                   onClick={() => openAuth('login')}
                   sx={{
-                    height: 28,
-                    px: 1.5,
-                    fontFamily: '"Barlow Condensed", sans-serif',
+                    height: 28, px: 1.5,
+                    fontFamily: F_LABEL,
                     fontWeight: 700,
-                    fontSize: '0.7rem',
-                    letterSpacing: '0.08em',
+                    fontSize: '0.62rem',
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
                     color: '#00D4FF',
                     background: 'rgba(0,212,255,0.08)',
                     border: '1px solid rgba(0,212,255,0.25)',
                     borderRadius: 1,
-                    textTransform: 'none',
-                    '&:hover': {
-                      background: 'rgba(0,212,255,0.16)',
-                      border: '1px solid rgba(0,212,255,0.5)',
-                    },
+                    '&:hover': { background: 'rgba(0,212,255,0.16)', border: '1px solid rgba(0,212,255,0.5)' },
                   }}
                 >
                   Sign In
                 </Button>
 
-                {/* Register button */}
+                {/* Register — gold gradient button, Orbitron */}
                 <Button
                   size="small"
-                  startIcon={<PersonAddIcon sx={{ fontSize: '0.85rem !important' }} />}
+                  startIcon={<PersonAddIcon sx={{ fontSize: '0.8rem !important' }} />}
                   onClick={() => openAuth('register')}
                   sx={{
-                    height: 28,
-                    px: 1.5,
-                    fontFamily: '"Barlow Condensed", sans-serif',
+                    height: 28, px: 1.5,
+                    fontFamily: F_LABEL,
                     fontWeight: 700,
-                    fontSize: '0.7rem',
-                    letterSpacing: '0.08em',
+                    fontSize: '0.62rem',
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
                     color: '#000',
                     background: 'linear-gradient(135deg, #FFD700, #FFA000)',
                     borderRadius: 1,
-                    textTransform: 'none',
                     boxShadow: '0 2px 10px rgba(255,215,0,0.2)',
-                    '&:hover': {
-                      background: 'linear-gradient(135deg, #FFE033, #FFB300)',
-                      boxShadow: '0 2px 16px rgba(255,215,0,0.35)',
-                    },
+                    '&:hover': { background: 'linear-gradient(135deg, #FFE033, #FFB300)', boxShadow: '0 2px 16px rgba(255,215,0,0.35)' },
                   }}
                 >
                   Register
@@ -226,7 +199,7 @@ const LeaderboardScreen: React.FC = () => {
               </>
             )}
 
-            {/* ── Auth area: authenticated ── */}
+            {/* Authenticated — username chip */}
             {isAuthenticated && (
               <Chip
                 icon={<PersonIcon sx={{ fontSize: '0.75rem !important' }} />}
@@ -235,9 +208,10 @@ const LeaderboardScreen: React.FC = () => {
                 onDelete={() => dispatch(logout())}
                 sx={{
                   height: 24,
-                  fontFamily: '"Barlow Condensed"',
+                  fontFamily: F_LABEL,
                   fontWeight: 600,
-                  fontSize: '0.65rem',
+                  fontSize: '0.62rem',
+                  letterSpacing: '0.06em',
                   background: 'rgba(0,212,255,0.1)',
                   color: '#00D4FF',
                   border: '1px solid rgba(0,212,255,0.2)',
@@ -250,8 +224,7 @@ const LeaderboardScreen: React.FC = () => {
             {/* Refresh */}
             <Tooltip title="Refresh leaderboard">
               <IconButton
-                size="small"
-                onClick={handleRefresh}
+                size="small" onClick={handleRefresh}
                 sx={{
                   color: 'rgba(255,255,255,0.4)',
                   '&:hover': { color: '#FFD700', transform: 'rotate(180deg)' },
@@ -265,67 +238,73 @@ const LeaderboardScreen: React.FC = () => {
           </Box>
         </Box>
 
-        {/* ── My Rank Banner (when authenticated and ranked) ───── */}
+        {/* ── My Rank Banner ── */}
         {isAuthenticated && currentPlayer && (
           <Box
             sx={{
-              mb: 2,
-              p: { xs: 1.5, sm: 2 },
-              borderRadius: 2,
+              mb: 2, p: { xs: 1.5, sm: 2 }, borderRadius: 2,
               background: alpha(rankColor || '#00D4FF', 0.06),
               border: `1px solid ${alpha(rankColor || '#00D4FF', 0.2)}`,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 2,
-              flexWrap: 'wrap',
-              animation: 'slideInUp 0.4s ease',
+              display: 'flex', alignItems: 'center', gap: 2,
+              flexWrap: 'wrap', animation: 'slideInUp 0.4s ease',
             }}
           >
             <Box>
-              <Typography
-                variant="subtitle1"
-                sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.6rem', mb: 0.25 }}
-              >
-                YOUR CURRENT RANK
-              </Typography>
+              {/* Label — Oxanium */}
               <Typography
                 sx={{
-                  fontFamily: '"Bebas Neue", sans-serif',
-                  fontSize: { xs: '2rem', sm: '2.5rem' },
-                  color: rankColor || '#00D4FF',
-                  lineHeight: 1,
-                  textShadow: `0 0 20px ${alpha(rankColor || '#00D4FF', 0.4)}`,
+                  fontFamily: F_LABEL, fontWeight: 600,
+                  fontSize: '0.55rem', letterSpacing: '0.16em',
+                  color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', mb: 0.25,
+                }}
+              >
+                Your Current Rank
+              </Typography>
+              {/* Rank number — Orbitron hero */}
+              <Typography
+                sx={{
+                  fontFamily: F_DISPLAY, fontWeight: 800,
+                  fontSize: { xs: '1.8rem', sm: '2.2rem' },
+                  color: rankColor || '#00D4FF', lineHeight: 1,
+                  textShadow: `0 0 20px ${alpha(rankColor || '#00D4FF', 0.45)}`,
+                  letterSpacing: '0.02em',
                 }}
               >
                 {currentRank ? getRankSuffix(currentRank) : '—'}
               </Typography>
             </Box>
+
             <Box sx={{ flex: 1 }}>
-              <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', fontFamily: '"Barlow Condensed"' }}>
-                Score: <Box component="span" sx={{ color: '#F0F2F8', fontWeight: 700 }}>
+              {/* Score line — Rajdhani + Share Tech Mono for value */}
+              <Typography sx={{ fontFamily: F_BODY, fontWeight: 600, fontSize: '0.9rem', color: 'rgba(255,255,255,0.55)', letterSpacing: '0.02em' }}>
+                Score:{' '}
+                <Box component="span" sx={{ fontFamily: F_MONO, color: '#F0F2F8', fontSize: '0.85rem' }}>
                   {currentPlayer.entry.score.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
                 </Box>
               </Typography>
               {currentPlayer.entry.prizeEstimate > 0 && (
-                <Typography sx={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.85rem', fontFamily: '"Barlow Condensed"' }}>
-                  Est. Prize: <Box component="span" sx={{ color: rankColor, fontWeight: 700 }}>
+                <Typography sx={{ fontFamily: F_BODY, fontWeight: 600, fontSize: '0.9rem', color: 'rgba(255,255,255,0.55)', letterSpacing: '0.02em' }}>
+                  Est. Prize:{' '}
+                  <Box component="span" sx={{ fontFamily: F_MONO, color: rankColor, fontSize: '0.85rem', fontWeight: 700 }}>
                     {currentPlayer.entry.prizeEstimate.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
                   </Box>
                 </Typography>
               )}
             </Box>
+
             <Box sx={{ textAlign: 'right' }}>
-              <Typography sx={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.3)', mb: 0.25 }}>
+              {/* Total players — Oxanium */}
+              <Typography sx={{ fontFamily: F_LABEL, fontWeight: 500, fontSize: '0.58rem', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.28)', mb: 0.25, textTransform: 'uppercase' }}>
                 {totalPlayers.toLocaleString()} total players
               </Typography>
+
               {currentPlayer.isInTop100 ? (
                 <Chip
-                  label="TOP 100 ✓"
+                  label="Top 100 ✓"
                   size="small"
                   sx={{
-                    fontFamily: '"Barlow Condensed"',
-                    fontWeight: 700,
-                    fontSize: '0.6rem',
+                    fontFamily: F_LABEL, fontWeight: 700,
+                    fontSize: '0.58rem', letterSpacing: '0.08em',
                     background: alpha(rankColor || '#00D4FF', 0.15),
                     color: rankColor || '#00D4FF',
                     border: `1px solid ${alpha(rankColor || '#00D4FF', 0.3)}`,
@@ -333,12 +312,11 @@ const LeaderboardScreen: React.FC = () => {
                 />
               ) : (
                 <Chip
-                  label={`${(currentRank || 0) - 100} BELOW TOP 100`}
+                  label={`${(currentRank || 0) - 100} below Top 100`}
                   size="small"
                   sx={{
-                    fontFamily: '"Barlow Condensed"',
-                    fontWeight: 700,
-                    fontSize: '0.6rem',
+                    fontFamily: F_LABEL, fontWeight: 700,
+                    fontSize: '0.58rem', letterSpacing: '0.06em',
                     background: 'rgba(255,179,0,0.1)',
                     color: '#FFB300',
                     border: '1px solid rgba(255,179,0,0.2)',
@@ -349,9 +327,9 @@ const LeaderboardScreen: React.FC = () => {
           </Box>
         )}
 
-        {/* ── Main Grid ──────────────────────────────────────────── */}
+        {/* ── Main Grid ── */}
         <Grid container spacing={2}>
-          {/* Left: Stats */}
+          {/* Left column */}
           <Grid item xs={12} md={4}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <PrizePoolBanner prizePool={prizePool} totalPlayers={totalPlayers} />
@@ -360,11 +338,15 @@ const LeaderboardScreen: React.FC = () => {
               )}
               <EarningsSimulator />
 
-              {/* Last updated */}
+              {/* Last updated — Oxanium micro */}
               {lastUpdated && (
                 <Typography
-                  variant="caption"
-                  sx={{ color: 'rgba(255,255,255,0.2)', textAlign: 'center', letterSpacing: '0.06em' }}
+                  sx={{
+                    fontFamily: F_LABEL, fontWeight: 500,
+                    fontSize: '0.54rem', letterSpacing: '0.1em',
+                    color: 'rgba(255,255,255,0.18)', textAlign: 'center',
+                    textTransform: 'uppercase',
+                  }}
                 >
                   Updated {new Date(lastUpdated).toLocaleTimeString()}
                 </Typography>
@@ -372,49 +354,39 @@ const LeaderboardScreen: React.FC = () => {
             </Box>
           </Grid>
 
-          {/* Right: Leaderboard */}
+          {/* Right column */}
           <Grid item xs={12} md={8}>
             <Paper
               elevation={0}
               sx={{
-                borderRadius: 2,
-                overflow: 'hidden',
+                borderRadius: 2, overflow: 'hidden',
                 background: 'rgba(15,17,23,0.95)',
                 backdropFilter: 'blur(20px)',
                 border: '1px solid rgba(255,255,255,0.06)',
               }}
             >
-              {/* Podium */}
               {top100.length >= 3 && (
                 <Box
                   sx={{
-                    pt: 3,
-                    pb: 0,
+                    pt: 3, pb: 0,
                     background: 'linear-gradient(180deg, rgba(255,215,0,0.04) 0%, transparent 100%)',
                     borderBottom: '1px solid rgba(255,255,255,0.06)',
                   }}
                 >
-                  <PodiumDisplay
-                    top3={top100.slice(0, 3)}
-                    currentPlayerId={playerId}
-                  />
+                  <PodiumDisplay top3={top100.slice(0, 3)} currentPlayerId={playerId} />
                 </Box>
               )}
 
-              {/* Table */}
               <Box sx={{ p: { xs: 1, sm: 1.5 } }}>
                 {error ? (
                   <Box sx={{ p: 3, textAlign: 'center' }}>
-                    <Typography sx={{ color: '#FF4D6A', fontFamily: '"Barlow Condensed"' }}>
+                    {/* Error text — Rajdhani */}
+                    <Typography sx={{ fontFamily: F_BODY, fontWeight: 600, fontSize: '1rem', color: '#FF4D6A', letterSpacing: '0.03em' }}>
                       {error}
                     </Typography>
                   </Box>
                 ) : (
-                  <LeaderboardTable
-                    top100={top100}
-                    currentPlayer={currentPlayer}
-                    loading={loading}
-                  />
+                  <LeaderboardTable top100={top100} currentPlayer={currentPlayer} loading={loading} />
                 )}
               </Box>
             </Paper>
@@ -422,12 +394,7 @@ const LeaderboardScreen: React.FC = () => {
         </Grid>
       </Container>
 
-      {/* ── Auth Modal ──────────────────────────────────────────── */}
-      <AuthModal
-        open={authModalOpen}
-        initialMode={authModalMode}
-        onClose={() => setAuthModalOpen(false)}
-      />
+      <AuthModal open={authModalOpen} initialMode={authModalMode} onClose={() => setAuthModalOpen(false)} />
     </Box>
   );
 };

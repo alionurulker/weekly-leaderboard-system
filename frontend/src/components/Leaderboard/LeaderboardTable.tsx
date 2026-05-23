@@ -8,14 +8,17 @@ import type { LeaderboardEntry } from '../../../../shared/types/index';
 import type { LeaderboardResponse } from '../../../../shared/types/index';
 import PlayerRow from './PlayerRow';
 
-
 interface LeaderboardTableProps {
   top100: LeaderboardEntry[];
   currentPlayer: LeaderboardResponse['currentPlayer'];
   loading: boolean;
 }
 
-const SectionHeader: React.FC<{ label: string; color?: string }> = ({ label, color = 'rgba(255,255,255,0.3)' }) => (
+// ─── Section divider ──────────────────────────────────────────────────────────
+const SectionHeader: React.FC<{ label: string; color?: string }> = ({
+  label,
+  color = 'rgba(255,255,255,0.25)',
+}) => (
   <Box
     sx={{
       display: 'flex',
@@ -26,9 +29,17 @@ const SectionHeader: React.FC<{ label: string; color?: string }> = ({ label, col
     }}
   >
     <Box sx={{ flex: 1, height: 1, background: `linear-gradient(90deg, transparent, ${alpha(color, 0.3)})` }} />
+    {/* Oxanium — wide tracking, feels like a game HUD section tag */}
     <Typography
-      variant="subtitle1"
-      sx={{ color, fontSize: '0.6rem', letterSpacing: '0.12em', whiteSpace: 'nowrap' }}
+      sx={{
+        fontFamily: '"Oxanium", sans-serif',
+        fontWeight: 700,
+        fontSize: '0.55rem',
+        letterSpacing: '0.2em',
+        color,
+        whiteSpace: 'nowrap',
+        textTransform: 'uppercase',
+      }}
     >
       {label}
     </Typography>
@@ -36,14 +47,15 @@ const SectionHeader: React.FC<{ label: string; color?: string }> = ({ label, col
   </Box>
 );
 
+// ─── Component ────────────────────────────────────────────────────────────────
 const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
   top100,
   currentPlayer,
   loading,
 }) => {
   const playerRowRef = useRef<HTMLDivElement>(null);
-  const [showScrollToMe, setShowScrollToMe] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [showScrollToMe, setShowScrollToMe] = useState(false);
 
   const isOutsideTop100 = currentPlayer && !currentPlayer.isInTop100;
 
@@ -51,15 +63,12 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
     playerRowRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
-  // Show "scroll to me" button when player's row is out of view
   useEffect(() => {
     if (!currentPlayer || !containerRef.current) return;
-
     const observer = new IntersectionObserver(
       ([entry]) => { setShowScrollToMe(!entry.isIntersecting); },
       { root: containerRef.current, threshold: 0.5 }
     );
-
     if (playerRowRef.current) observer.observe(playerRowRef.current);
     return () => observer.disconnect();
   }, [currentPlayer, top100]);
@@ -74,7 +83,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
 
   return (
     <Box sx={{ position: 'relative' }}>
-      {/* Table header */}
+      {/* ── Column header ── */}
       <Box
         sx={{
           display: 'flex',
@@ -86,34 +95,49 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
           mb: 0.5,
         }}
       >
-        <Typography sx={{ minWidth: 36, fontSize: '0.6rem', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.1em' }}>
-          RANK
-        </Typography>
-        <Typography sx={{ width: 28, fontSize: '0.6rem', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.1em' }}>
-          ±
-        </Typography>
-        <Box sx={{ width: 36, flexShrink: 0 }} />
-        <Typography sx={{ flex: 1, fontSize: '0.6rem', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.1em' }}>
-          PLAYER
-        </Typography>
-        <Typography sx={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.3)', letterSpacing: '0.1em' }}>
-          SCORE
-        </Typography>
+        {/* All column labels use Oxanium — compact, technical, wide-tracked */}
+        {[
+          { label: 'Rank', sx: { minWidth: 36 } },
+          { label: '±',    sx: { width: 28 } },
+          { label: '',     sx: { width: 34, flexShrink: 0 } }, // avatar spacer
+          { label: 'Player', sx: { flex: 1 } },
+          { label: 'Score', sx: {} },
+        ].map(({ label, sx }) => (
+          <Typography
+            key={label}
+            sx={{
+              fontFamily: '"Oxanium", sans-serif',
+              fontWeight: 600,
+              fontSize: '0.55rem',
+              letterSpacing: '0.14em',
+              color: 'rgba(255,255,255,0.28)',
+              textTransform: 'uppercase',
+              ...sx,
+            }}
+          >
+            {label}
+          </Typography>
+        ))}
+
+        {/* Prize column — hidden on xs */}
         <Typography
           sx={{
+            fontFamily: '"Oxanium", sans-serif',
+            fontWeight: 600,
+            fontSize: '0.55rem',
+            letterSpacing: '0.14em',
+            color: 'rgba(255,255,255,0.28)',
+            textTransform: 'uppercase',
             minWidth: { xs: 0, sm: 80 },
-            fontSize: '0.6rem',
-            color: 'rgba(255,255,255,0.3)',
-            letterSpacing: '0.1em',
             textAlign: 'right',
             display: { xs: 'none', sm: 'block' },
           }}
         >
-          EST. PRIZE
+          Est. Prize
         </Typography>
       </Box>
 
-      {/* Scroll container */}
+      {/* ── Scrollable rows ── */}
       <Box
         ref={containerRef}
         sx={{
@@ -124,97 +148,69 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
           pr: 0.5,
         }}
       >
-        {/* Top 3 section header */}
-        {top100.length > 0 && (
-          <SectionHeader label="PODIUM" color="#FFD700" />
-        )}
+        {top100.length > 0 && <SectionHeader label="Podium" color="#FFD700" />}
 
-        {/* Ranks 1-3 */}
         {top100.slice(0, 3).map((entry, i) => (
-          <Box
-            key={entry.playerId}
-            ref={entry.isCurrentPlayer ? playerRowRef : undefined}
-          >
+          <Box key={entry.playerId} ref={entry.isCurrentPlayer ? playerRowRef : undefined}>
             <PlayerRow entry={entry} index={i} />
           </Box>
         ))}
 
-        {/* Rank 4-10 section */}
-        {top100.length > 3 && (
-          <SectionHeader label="TOP 10" color="#00D4FF" />
-        )}
+        {top100.length > 3 && <SectionHeader label="Top 10" color="#00D4FF" />}
         {top100.slice(3, 10).map((entry, i) => (
-          <Box
-            key={entry.playerId}
-            ref={entry.isCurrentPlayer ? playerRowRef : undefined}
-          >
+          <Box key={entry.playerId} ref={entry.isCurrentPlayer ? playerRowRef : undefined}>
             <PlayerRow entry={entry} index={i + 3} />
           </Box>
         ))}
 
-        {/* Rank 11-100 section */}
-        {top100.length > 10 && (
-          <SectionHeader label="TOP 100" color="#8B9FFF" />
-        )}
+        {top100.length > 10 && <SectionHeader label="Top 100" color="#8B9FFF" />}
         {top100.slice(10).map((entry, i) => (
-          <Box
-            key={entry.playerId}
-            ref={entry.isCurrentPlayer ? playerRowRef : undefined}
-          >
+          <Box key={entry.playerId} ref={entry.isCurrentPlayer ? playerRowRef : undefined}>
             <PlayerRow entry={entry} index={i + 10} />
           </Box>
         ))}
 
-        {/* Outside top 100: show separator + surrounding context */}
         {isOutsideTop100 && currentPlayer.surrounding.length > 0 && (
           <>
             <Box ref={playerRowRef}>
-              <SectionHeader label="YOUR POSITION" color="#00D4FF" />
+              <SectionHeader label="Your Position" color="#00D4FF" />
             </Box>
-
             {currentPlayer.surrounding.map((entry, i) => (
-              <PlayerRow
-                key={`ctx-${entry.playerId}`}
-                entry={entry}
-                index={i}
-              />
+              <PlayerRow key={`ctx-${entry.playerId}`} entry={entry} index={i} />
             ))}
           </>
         )}
 
-        {/* Empty state */}
         {top100.length === 0 && !loading && (
           <Box sx={{ textAlign: 'center', py: 8 }}>
             <Typography sx={{ fontSize: '2rem', mb: 1 }}>🏆</Typography>
-            <Typography sx={{ color: 'rgba(255,255,255,0.4)', fontFamily: '"Barlow Condensed"' }}>
+            <Typography
+              sx={{
+                fontFamily: '"Rajdhani", sans-serif',
+                fontWeight: 500,
+                fontSize: '1rem',
+                letterSpacing: '0.06em',
+                color: 'rgba(255,255,255,0.35)',
+              }}
+            >
               No players yet. Be the first!
             </Typography>
           </Box>
         )}
       </Box>
 
-      {/* Scroll-to-me FAB */}
+      {/* ── Scroll-to-me FAB ── */}
       {showScrollToMe && currentPlayer && (
         <Tooltip title={`Jump to your rank #${currentPlayer.entry.rank}`} placement="left">
-          <Box
-            sx={{
-              position: 'absolute',
-              bottom: 16,
-              right: 8,
-              zIndex: 10,
-            }}
-          >
+          <Box sx={{ position: 'absolute', bottom: 16, right: 8, zIndex: 10 }}>
             <IconButton
               onClick={scrollToPlayer}
               sx={{
-                background: 'rgba(0,212,255,0.15)',
-                border: '1px solid rgba(0,212,255,0.35)',
+                background: 'rgba(0,212,255,0.12)',
+                border: '1px solid rgba(0,212,255,0.3)',
                 color: '#00D4FF',
                 backdropFilter: 'blur(8px)',
-                '&:hover': {
-                  background: 'rgba(0,212,255,0.25)',
-                  transform: 'scale(1.05)',
-                },
+                '&:hover': { background: 'rgba(0,212,255,0.22)', transform: 'scale(1.06)' },
                 transition: 'all 0.2s',
               }}
               size="small"

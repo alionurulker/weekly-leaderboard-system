@@ -12,32 +12,56 @@ const TimeUnit: React.FC<{ value: number; label: string; urgent: boolean }> = ({
     <Box
       sx={{
         background: urgent
-          ? 'rgba(255,77,106,0.15)'
-          : 'rgba(255,255,255,0.05)',
-        border: `1px solid ${urgent ? 'rgba(255,77,106,0.3)' : 'rgba(255,255,255,0.1)'}`,
+          ? 'rgba(255,77,106,0.12)'
+          : 'rgba(255,255,255,0.04)',
+        border: `1px solid ${urgent ? 'rgba(255,77,106,0.35)' : 'rgba(255,255,255,0.1)'}`,
         borderRadius: 1.5,
         px: { xs: 1, sm: 1.5 },
         py: 0.75,
         mb: 0.5,
         transition: 'all 0.3s',
+        position: 'relative',
+        overflow: 'hidden',
+        /* subtle inner top line */
+        '&::after': {
+          content: '""',
+          position: 'absolute',
+          top: 0, left: 0, right: 0,
+          height: '1px',
+          background: urgent
+            ? 'rgba(255,77,106,0.5)'
+            : 'rgba(255,215,0,0.15)',
+        },
       }}
     >
+      {/* Number — Orbitron: geometric, unmistakably a game timer */}
       <Typography
         sx={{
-          fontFamily: '"Bebas Neue", sans-serif',
-          fontSize: { xs: '1.4rem', sm: '1.75rem' },
+          fontFamily: '"Orbitron", sans-serif',
+          fontWeight: 700,
+          fontSize: { xs: '1.3rem', sm: '1.65rem' },
           lineHeight: 1,
           color: urgent ? '#FF4D6A' : '#F0F2F8',
           minWidth: 32,
           display: 'inline-block',
+          textShadow: urgent ? '0 0 12px rgba(255,77,106,0.6)' : '0 0 8px rgba(255,215,0,0.15)',
+          animation: 'numberTick 0.1s ease',
         }}
       >
         {String(value).padStart(2, '0')}
       </Typography>
     </Box>
+
+    {/* Unit label — Oxanium, wide tracking */}
     <Typography
-      variant="caption"
-      sx={{ color: 'rgba(255,255,255,0.35)', letterSpacing: '0.08em', fontSize: '0.6rem' }}
+      sx={{
+        fontFamily: '"Oxanium", sans-serif',
+        fontWeight: 600,
+        fontSize: '0.52rem',
+        letterSpacing: '0.16em',
+        color: urgent ? 'rgba(255,77,106,0.6)' : 'rgba(255,255,255,0.3)',
+        textTransform: 'uppercase',
+      }}
     >
       {label}
     </Typography>
@@ -70,38 +94,71 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({ nextResetAt, weekStart 
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1.5 }}>
+        {/* Section label — Oxanium */}
         <Typography
-          variant="subtitle1"
-          sx={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.65rem' }}
+          sx={{
+            fontFamily: '"Oxanium", sans-serif',
+            fontWeight: 600,
+            fontSize: '0.6rem',
+            letterSpacing: '0.16em',
+            color: 'rgba(255,255,255,0.35)',
+            textTransform: 'uppercase',
+          }}
         >
-          ⏳ RESETS IN
+          ⏳ Resets In
         </Typography>
+
         {urgent && (
           <Typography
             sx={{
-              fontSize: '0.6rem',
-              color: '#FF4D6A',
-              fontFamily: '"Barlow Condensed"',
+              fontFamily: '"Orbitron", sans-serif',
               fontWeight: 700,
+              fontSize: '0.55rem',
+              letterSpacing: '0.12em',
+              color: '#FF4D6A',
+              textTransform: 'uppercase',
               animation: 'rankPulse 1s infinite',
-              letterSpacing: '0.06em',
+              textShadow: '0 0 8px rgba(255,77,106,0.7)',
             }}
           >
-            FINAL HOURS
+            Final Hours
           </Typography>
         )}
       </Box>
 
+      {/* Timer units */}
       <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: { xs: 0.5, sm: 1 }, mb: 1.5 }}>
-        <TimeUnit value={timeLeft.days} label="DAYS" urgent={urgent} />
-        <Typography sx={{ color: 'rgba(255,255,255,0.3)', fontSize: '1.5rem', fontFamily: '"Bebas Neue"', mt: 0.25 }}>:</Typography>
-        <TimeUnit value={timeLeft.hours} label="HRS" urgent={urgent} />
-        <Typography sx={{ color: 'rgba(255,255,255,0.3)', fontSize: '1.5rem', fontFamily: '"Bebas Neue"', mt: 0.25 }}>:</Typography>
-        <TimeUnit value={timeLeft.minutes} label="MIN" urgent={urgent} />
-        <Typography sx={{ color: 'rgba(255,255,255,0.3)', fontSize: '1.5rem', fontFamily: '"Bebas Neue"', mt: 0.25 }}>:</Typography>
-        <TimeUnit value={timeLeft.seconds} label="SEC" urgent={urgent} />
+        <TimeUnit value={timeLeft.days}    label="Days" urgent={urgent} />
+        <Typography sx={{
+          fontFamily: '"Orbitron", sans-serif',
+          fontWeight: 700,
+          color: urgent ? 'rgba(255,77,106,0.5)' : 'rgba(255,255,255,0.2)',
+          fontSize: '1.4rem',
+          mt: 0.2,
+          lineHeight: 1,
+        }}>:</Typography>
+        <TimeUnit value={timeLeft.hours}   label="Hrs"  urgent={urgent} />
+        <Typography sx={{
+          fontFamily: '"Orbitron", sans-serif',
+          fontWeight: 700,
+          color: urgent ? 'rgba(255,77,106,0.5)' : 'rgba(255,255,255,0.2)',
+          fontSize: '1.4rem',
+          mt: 0.2,
+          lineHeight: 1,
+        }}>:</Typography>
+        <TimeUnit value={timeLeft.minutes} label="Min"  urgent={urgent} />
+        <Typography sx={{
+          fontFamily: '"Orbitron", sans-serif',
+          fontWeight: 700,
+          color: urgent ? 'rgba(255,77,106,0.5)' : 'rgba(255,255,255,0.2)',
+          fontSize: '1.4rem',
+          mt: 0.2,
+          lineHeight: 1,
+        }}>:</Typography>
+        <TimeUnit value={timeLeft.seconds} label="Sec"  urgent={urgent} />
       </Box>
 
+      {/* Progress bar */}
       <LinearProgress
         variant="determinate"
         value={progress}

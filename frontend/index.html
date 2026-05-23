@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -6,8 +6,66 @@
     <meta name="description" content="Weekly competitive leaderboard with automatic prize pool distribution" />
     <title>Weekly Leaderboard</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏆</text></svg>" />
+
+    <!-- Gaming font stack via Google Fonts -->
+    <!-- Orbitron: hero display, prize numbers, rank badges -->
+    <!-- Oxanium: section headers, UI labels, chip text     -->
+    <!-- Rajdhani: table rows, body text, descriptions      -->
+    <!-- Share Tech Mono: scores, currency, stat values     -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Oxanium:wght@300;400;500;600;700;800&family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* ── Reset & base ─────────────────────────────────────── */
+      *, *::before, *::after { box-sizing: border-box; }
+
+      html, body, #root {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        background: #080A10;
+        color: #F0F2F8;
+        /* Rajdhani as the global default body font */
+        font-family: 'Rajdhani', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      /* ── Scrollbar ────────────────────────────────────────── */
+      ::-webkit-scrollbar { width: 4px; height: 4px; }
+      ::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255,215,0,0.2);
+        border-radius: 2px;
+      }
+      ::-webkit-scrollbar-thumb:hover { background: rgba(255,215,0,0.4); }
+
+      /* ── Keyframe animations ──────────────────────────────── */
+      @keyframes slideInUp {
+        from { opacity: 0; transform: translateY(16px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes rankPulse {
+        0%, 100% { opacity: 1; }
+        50%       { opacity: 0.4; }
+      }
+      @keyframes crownFloat {
+        0%, 100% { transform: translateY(0px); }
+        50%       { transform: translateY(-4px); }
+      }
+      @keyframes shimmer {
+        from { left: -100%; }
+        to   { left: 200%; }
+      }
+      @keyframes numberTick {
+        from { transform: translateY(-4px); opacity: 0; }
+        to   { transform: translateY(0);    opacity: 1; }
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>

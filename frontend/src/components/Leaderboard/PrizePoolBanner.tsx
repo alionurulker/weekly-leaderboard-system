@@ -68,20 +68,31 @@ const PrizePoolBanner: React.FC<PrizePoolBannerProps> = ({ prizePool, totalPlaye
       >
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1 }}>
           <Box>
+            {/* Label — Oxanium, tight tracking */}
             <Typography
-              variant="subtitle1"
-              sx={{ color: 'rgba(255,215,0,0.6)', mb: 0.5, fontSize: '0.65rem' }}
-            >
-              💰 WEEKLY PRIZE POOL
-            </Typography>
-            <Typography
-              variant="h2"
               sx={{
-                fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' },
+                fontFamily: '"Oxanium", sans-serif',
+                fontWeight: 600,
+                fontSize: '0.6rem',
+                letterSpacing: '0.18em',
+                color: 'rgba(255,215,0,0.55)',
+                mb: 0.5,
+                textTransform: 'uppercase',
+              }}
+            >
+              💰 Weekly Prize Pool
+            </Typography>
+
+            {/* Prize number — Orbitron, hero size */}
+            <Typography
+              sx={{
+                fontFamily: '"Orbitron", sans-serif',
+                fontWeight: 800,
+                fontSize: { xs: '1.9rem', sm: '2.4rem', md: '2.8rem' },
                 color: '#FFD700',
                 lineHeight: 1,
-                textShadow: '0 0 30px rgba(255,215,0,0.5)',
-                fontFamily: '"Bebas Neue", sans-serif',
+                textShadow: '0 0 30px rgba(255,215,0,0.5), 0 0 60px rgba(255,215,0,0.2)',
+                letterSpacing: '0.02em',
               }}
             >
               <AnimatedNumber value={prizePool} />
@@ -89,24 +100,37 @@ const PrizePoolBanner: React.FC<PrizePoolBannerProps> = ({ prizePool, totalPlaye
           </Box>
 
           <Box sx={{ textAlign: { xs: 'left', sm: 'right' } }}>
+            {/* Label */}
             <Typography
-              variant="subtitle1"
-              sx={{ color: 'rgba(255,255,255,0.4)', mb: 0.5, fontSize: '0.65rem' }}
-            >
-              COMPETING PLAYERS
-            </Typography>
-            <Typography
-              variant="h4"
               sx={{
+                fontFamily: '"Oxanium", sans-serif',
+                fontWeight: 600,
+                fontSize: '0.6rem',
+                letterSpacing: '0.18em',
+                color: 'rgba(255,255,255,0.35)',
+                mb: 0.5,
+                textTransform: 'uppercase',
+              }}
+            >
+              Competing Players
+            </Typography>
+
+            {/* Player count — Orbitron */}
+            <Typography
+              sx={{
+                fontFamily: '"Orbitron", sans-serif',
+                fontWeight: 700,
+                fontSize: { xs: '1.4rem', sm: '1.8rem' },
                 color: '#F0F2F8',
-                fontFamily: '"Bebas Neue", sans-serif',
-                fontSize: { xs: '1.5rem', sm: '2rem' },
+                letterSpacing: '0.02em',
+                lineHeight: 1,
               }}
             >
               {totalPlayers.toLocaleString()}
             </Typography>
 
-            <Box sx={{ mt: 1, display: 'flex', gap: 1, justifyContent: { xs: 'flex-start', sm: 'flex-end' }, flexWrap: 'wrap' }}>
+            {/* Prize tier chips */}
+            <Box sx={{ mt: 1.5, display: 'flex', gap: 0.75, justifyContent: { xs: 'flex-start', sm: 'flex-end' }, flexWrap: 'wrap' }}>
               {[
                 { label: '1st', value: '20%', color: '#FFD700' },
                 { label: '2nd', value: '15%', color: '#C0C0C0' },
@@ -116,7 +140,7 @@ const PrizePoolBanner: React.FC<PrizePoolBannerProps> = ({ prizePool, totalPlaye
                 <Box
                   key={label}
                   sx={{
-                    px: 1, py: 0.25,
+                    px: 1, py: 0.3,
                     borderRadius: 1,
                     background: alpha(color, 0.1),
                     border: `1px solid ${alpha(color, 0.25)}`,
@@ -125,10 +149,28 @@ const PrizePoolBanner: React.FC<PrizePoolBannerProps> = ({ prizePool, totalPlaye
                     gap: 0.5,
                   }}
                 >
-                  <Typography sx={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.5)', fontFamily: '"Barlow Condensed"' }}>
+                  {/* Tier label — Rajdhani */}
+                  <Typography
+                    sx={{
+                      fontFamily: '"Rajdhani", sans-serif',
+                      fontWeight: 600,
+                      fontSize: '0.6rem',
+                      color: 'rgba(255,255,255,0.45)',
+                      letterSpacing: '0.06em',
+                    }}
+                  >
                     {label}
                   </Typography>
-                  <Typography sx={{ fontSize: '0.65rem', color, fontWeight: 700, fontFamily: '"Barlow Condensed"' }}>
+                  {/* Tier value — Oxanium bold */}
+                  <Typography
+                    sx={{
+                      fontFamily: '"Oxanium", sans-serif',
+                      fontWeight: 700,
+                      fontSize: '0.65rem',
+                      color,
+                      letterSpacing: '0.04em',
+                    }}
+                  >
                     {value}
                   </Typography>
                 </Box>
