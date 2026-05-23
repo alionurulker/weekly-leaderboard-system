@@ -75,7 +75,7 @@ const PrizePoolBanner: React.FC<PrizePoolBannerProps> = ({ prizePool, totalPlaye
                 fontWeight: 600,
                 fontSize: '0.6rem',
                 letterSpacing: '0.18em',
-                color: 'rgba(255,215,0,0.55)',
+                color: 'rgba(255,215,0,0.65)',
                 mb: 0.5,
                 textTransform: 'uppercase',
               }}
@@ -88,7 +88,7 @@ const PrizePoolBanner: React.FC<PrizePoolBannerProps> = ({ prizePool, totalPlaye
               sx={{
                 fontFamily: '"Orbitron", sans-serif',
                 fontWeight: 800,
-                fontSize: { xs: '1.9rem', sm: '2.4rem', md: '2.8rem' },
+                fontSize: 'clamp(1.2rem, 5vw, 2.1rem)',
                 color: '#FFD700',
                 lineHeight: 1,
                 textShadow: '0 0 30px rgba(255,215,0,0.5), 0 0 60px rgba(255,215,0,0.2)',
@@ -99,7 +99,7 @@ const PrizePoolBanner: React.FC<PrizePoolBannerProps> = ({ prizePool, totalPlaye
             </Typography>
           </Box>
 
-          <Box sx={{ textAlign: { xs: 'left', sm: 'right' } }}>
+          <Box sx={{ textAlign: { xs: 'left', sm: 'left' } }}>
             {/* Label */}
             <Typography
               sx={{
@@ -107,7 +107,7 @@ const PrizePoolBanner: React.FC<PrizePoolBannerProps> = ({ prizePool, totalPlaye
                 fontWeight: 600,
                 fontSize: '0.6rem',
                 letterSpacing: '0.18em',
-                color: 'rgba(255,255,255,0.35)',
+                color: 'rgba(255,255,255,0.65)',
                 mb: 0.5,
                 textTransform: 'uppercase',
               }}

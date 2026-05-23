@@ -101,7 +101,7 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({ nextResetAt, weekStart 
             fontWeight: 600,
             fontSize: '0.6rem',
             letterSpacing: '0.16em',
-            color: 'rgba(255,255,255,0.35)',
+            color: 'rgba(255,255,255,0.85)',
             textTransform: 'uppercase',
           }}
         >

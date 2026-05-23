@@ -57,7 +57,7 @@ const RankBadge: React.FC<{ rank: number }> = ({ rank }) => {
 // ─── Change Indicator ─────────────────────────────────────────────────────────
 const ChangeIndicator: React.FC<{ change?: number }> = ({ change }) => {
   if (change === undefined || change === 0) {
-    return <RemoveIcon sx={{ fontSize: 14, color: 'rgba(255,255,255,0.18)' }} />;
+    return <RemoveIcon sx={{ fontSize: 14, color: 'rgba(255, 255, 255, 0.84)' }} />;
   }
   if (change > 0) {
     return (
@@ -280,7 +280,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ entry, index, isSeparator }) => {
                   fontWeight: 500,
                   fontSize: '0.48rem',
                   letterSpacing: '0.12em',
-                  color: 'rgba(255,255,255,0.28)',
+                  color: 'rgba(255,255,255,0.48)',
                   textTransform: 'uppercase',
                   lineHeight: 1.4,
                 }}

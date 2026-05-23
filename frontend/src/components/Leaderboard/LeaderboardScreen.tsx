@@ -112,7 +112,7 @@ const LeaderboardScreen: React.FC = () => {
                     fontWeight: 500,
                     fontSize: '0.58rem',
                     letterSpacing: '0.14em',
-                    color: 'rgba(255,255,255,0.28)',
+                    color: 'rgba(255, 255, 255, 0.84)',
                     textTransform: 'uppercase',
                     mt: 0.25,
                   }}
@@ -294,7 +294,7 @@ const LeaderboardScreen: React.FC = () => {
 
             <Box sx={{ textAlign: 'right' }}>
               {/* Total players — Oxanium */}
-              <Typography sx={{ fontFamily: F_LABEL, fontWeight: 500, fontSize: '0.58rem', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.28)', mb: 0.25, textTransform: 'uppercase' }}>
+              <Typography sx={{ fontFamily: F_LABEL, fontWeight: 500, fontSize: '0.58rem', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.48)', mb: 0.25, textTransform: 'uppercase' }}>
                 {totalPlayers.toLocaleString()} total players
               </Typography>
 
@@ -344,7 +344,7 @@ const LeaderboardScreen: React.FC = () => {
                   sx={{
                     fontFamily: F_LABEL, fontWeight: 500,
                     fontSize: '0.54rem', letterSpacing: '0.1em',
-                    color: 'rgba(255,255,255,0.18)', textAlign: 'center',
+                    color: 'rgba(255, 255, 255, 0.65)', textAlign: 'center',
                     textTransform: 'uppercase',
                   }}
                 >

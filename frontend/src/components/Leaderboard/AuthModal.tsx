@@ -373,7 +373,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, initialMode = 'login', onCl
                 fullWidth size="small"
                 sx={{ ...fieldSx, '& select': { color: regCountry ? '#F0F2F8' : 'rgba(255,255,255,0.35)' } }}
               >
-                <option value="" style={{ background: '#0d0f16', color: 'rgba(255,255,255,0.35)' }}>— Select country —</option>
+                <option value="" style={{ background: '#0d0f16', color: 'rgba(255,255,255,0.35)' }}></option>
                 {COUNTRIES.map((c) => (
                   <option key={c.code} value={c.code} style={{ background: '#0d0f16', color: '#F0F2F8' }}>{c.label}</option>
                 ))}

@@ -110,7 +110,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
               fontWeight: 600,
               fontSize: '0.55rem',
               letterSpacing: '0.14em',
-              color: 'rgba(255,255,255,0.28)',
+              color: 'rgba(255,255,255,0.48)',
               textTransform: 'uppercase',
               ...sx,
             }}
@@ -126,7 +126,7 @@ const LeaderboardTable: React.FC<LeaderboardTableProps> = ({
             fontWeight: 600,
             fontSize: '0.55rem',
             letterSpacing: '0.14em',
-            color: 'rgba(255,255,255,0.28)',
+            color: 'rgba(255,255,255,0.48)',
             textTransform: 'uppercase',
             minWidth: { xs: 0, sm: 80 },
             textAlign: 'right',
