@@ -130,7 +130,7 @@ const PrizePoolBanner: React.FC<PrizePoolBannerProps> = ({ prizePool, totalPlaye
             </Typography>
 
             {/* Prize tier chips */}
-            <Box sx={{ mt: 1.5, display: 'flex', gap: 0.75, justifyContent: { xs: 'flex-start', sm: 'flex-end' }, flexWrap: 'wrap' }}>
+            <Box sx={{ mt: 1.5, display: 'flex', gap: 0.75, justifyContent: { xs: 'flex-start' }, flexWrap: 'wrap' }}>
               {[
                 { label: '1st', value: '20%', color: '#FFD700' },
                 { label: '2nd', value: '15%', color: '#C0C0C0' },
