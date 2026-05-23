@@ -14,7 +14,7 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
 import { useAppDispatch, useAppSelector } from '../../store';
 import { fetchLeaderboard } from '../../store/leaderboardSlice';
-import {  logout } from '../../store/playerSlice';
+import { logout } from '../../store/playerSlice';
 import { useWebSocket } from '../../hooks/useWebSocket';
 
 import PrizePoolBanner from './PrizePoolBanner';
@@ -28,9 +28,9 @@ import { getRankColor as getThemeRankColor } from '../../theme';
 
 // ── Font constants ────────────────────────────────────────────────────────────
 const F_DISPLAY = '"Orbitron", sans-serif';
-const F_LABEL   = '"Oxanium", sans-serif';
-const F_BODY    = '"Rajdhani", sans-serif';
-const F_MONO    = '"Share Tech Mono", monospace';
+const F_LABEL = '"Oxanium", sans-serif';
+const F_BODY = '"Rajdhani", sans-serif';
+const F_MONO = '"Share Tech Mono", monospace';
 
 type AuthModalMode = 'login' | 'register';
 
@@ -82,7 +82,7 @@ const LeaderboardScreen: React.FC = () => {
         >
           {/* Left: logo + title */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <EmojiEventsIcon sx={{ fontSize: { xs: '1.5rem', sm: '2rem' }, color: '#FFD700', filter: 'drop-shadow(0 0 8px rgba(255,215,0,0.5))' }} />
+            <EmojiEventsIcon sx={{ fontSize: { xs: '1.5rem', sm: '2rem' }, color: '#FFD700' }} />
             <Box>
               {/* Title — Orbitron */}
               <Typography
@@ -360,8 +360,7 @@ const LeaderboardScreen: React.FC = () => {
               elevation={0}
               sx={{
                 borderRadius: 2, overflow: 'hidden',
-                background: 'rgba(15,17,23,0.95)',
-                backdropFilter: 'blur(20px)',
+                background: 'rgba(15,17,23,0.98)',
                 border: '1px solid rgba(255,255,255,0.06)',
               }}
             >

@@ -83,16 +83,18 @@ const ChangeIndicator: React.FC<{ change?: number }> = ({ change }) => {
 // ─── PlayerRow ───────────────────────────────────────────────────────────────
 const PlayerRow: React.FC<PlayerRowProps> = ({ entry, index, isSeparator }) => {
   const rankColor = getThemeRankColor(entry.rank);
-  const [scoreFlash, setScoreFlash] = useState(false);
-  const prevScore = useRef(entry.score);
+  const hasAnimated = useRef(false);
+  const animationStyle = !hasAnimated.current
+    ? { animation: `slideInUp 0.35s ease ${Math.min(index, 15) * 0.02}s both` }
+    : {};
+  if (!hasAnimated.current) hasAnimated.current = true;
 
-  useEffect(() => {
-    if (prevScore.current !== entry.score && prevScore.current !== 0) {
-      setScoreFlash(true);
-      setTimeout(() => setScoreFlash(false), 800);
-    }
-    prevScore.current = entry.score;
-  }, [entry.score]);
+  const flashKey = useRef(0);
+  const prevScore = useRef(entry.score);
+  if (prevScore.current !== entry.score && prevScore.current !== 0) {
+    flashKey.current += 1;
+  }
+  prevScore.current = entry.score;
 
   // Separator row
   if (isSeparator) {
@@ -133,7 +135,7 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ entry, index, isSeparator }) => {
         py: { xs: 0.9, sm: 1.1 },
         borderRadius: 1.5,
         border: '1px solid transparent',
-        animation: `slideInUp 0.35s ease ${Math.min(index, 15) * 0.02}s both`,
+        ...animationStyle,
         transition: 'background 0.2s, border-color 0.2s',
         position: 'relative',
         overflow: 'hidden',
@@ -248,8 +250,8 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ entry, index, isSeparator }) => {
           sx={{
             fontFamily: '"Share Tech Mono", monospace',
             fontSize: { xs: '0.82rem', sm: '0.9rem' },
-            color: scoreFlash ? '#00E396' : 'rgba(255,255,255,0.65)',
-            transition: 'color 0.3s',
+            color: 'rgba(255,255,255,0.65)',
+            animation: flashKey.current > 0 ? 'scoreFlash 0.8s ease' : 'none',
             letterSpacing: '0.01em',
             lineHeight: 1.3,
           }}
@@ -308,4 +310,9 @@ const PlayerRow: React.FC<PlayerRowProps> = ({ entry, index, isSeparator }) => {
   );
 };
 
-export default PlayerRow;
+export default React.memo(PlayerRow, (prev, next) =>
+  prev.entry.score === next.entry.score &&
+  prev.entry.rank === next.entry.rank &&
+  prev.entry.change === next.entry.change &&
+  prev.entry.isCurrentPlayer === next.entry.isCurrentPlayer
+);

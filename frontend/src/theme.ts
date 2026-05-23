@@ -140,6 +140,30 @@ export const theme = createTheme({
   components: {
     MuiCssBaseline: {
       styleOverrides: `
+    @font-face {
+      font-family: 'Orbitron';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      size-adjust: 105%;
+    }
+
+    @font-face {
+      font-family: 'Oxanium';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      size-adjust: 100%;
+    }
+
+    @font-face {
+      font-family: 'Rajdhani';
+      font-style: normal;
+      font-weight: 400;
+      font-display: swap;
+      size-adjust: 100%;
+    }
+
     * { box-sizing: border-box; }
 
     html, body, #root {
