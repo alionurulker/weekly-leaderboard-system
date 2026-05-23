@@ -31,7 +31,7 @@ const COUNTRIES = [
 const F_DISPLAY = '"Orbitron", sans-serif';   // hero titles
 const F_LABEL   = '"Oxanium", sans-serif';    // labels, tabs, chips
 const F_BODY    = '"Rajdhani", sans-serif';   // body text, helper text
-const F_MONO    = '"Share Tech Mono", monospace'; // input values (unused here but kept consistent)
+
 
 // ── Shared field styles ───────────────────────────────────────────────────────
 const fieldSx = {
@@ -373,7 +373,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ open, initialMode = 'login', onCl
                 fullWidth size="small"
                 sx={{ ...fieldSx, '& select': { color: regCountry ? '#F0F2F8' : 'rgba(255,255,255,0.35)' } }}
               >
-                <option value="" style={{ background: '#0d0f16', color: 'rgba(255,255,255,0.35)' }}></option>
+                <option value="" style={{ background: '#0d0f16', color: 'rgba(255,255,255,0.35)' }}>— Select country —</option>
                 {COUNTRIES.map((c) => (
                   <option key={c.code} value={c.code} style={{ background: '#0d0f16', color: '#F0F2F8' }}>{c.label}</option>
                 ))}
